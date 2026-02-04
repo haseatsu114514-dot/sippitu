@@ -49,9 +49,32 @@ for note in contents:
     # Clean body
     body_text = clean_html(body_html)
     
+    # Categorization logic
+    tags = [h.get('hashtag', {}).get('name', '').replace('#', '') for h in note.get('hashtags', [])]
+    
+    category = "コラム" # Default
+    
+    is_fortune = any(t in ["占い", "四柱推命", "鑑定", "運勢"] for t in tags)
+    is_column = any(t in ["コラム", "エッセイ", "思考", "人生"] for t in tags)
+    is_news = any(t in ["お知らせ", "告知", "news"] for t in tags)
+    
+    if is_fortune:
+        category = "占い"
+    elif is_news:
+        category = "お知らせ"
+    elif is_column:
+        category = "コラム"
+    else:
+        # Title based fallback
+        if "占い" in title or "鑑定" in title:
+            category = "占い"
+        elif "お知らせ" in title:
+            category = "お知らせ"
+
     # Create file content
     file_content = f"# {title}\n\n"
     file_content += f"公開日: {display_date}\n"
+    file_content += f"カテゴリ: {category}\n"
     file_content += f"リンク: {link}\n\n"
     file_content += "---\n\n"
     file_content += body_text
